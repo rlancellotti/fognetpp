@@ -1,8 +1,6 @@
 package fog;
 
-//
-// A queue with a built-in server
-//
+
 simple FogPU
 {
     parameters:

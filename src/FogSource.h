@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __CLOUDAPPSOURCE_H
-#define __CLOUDAPPSOURCE_H
+#ifndef __FOGSOURCE_H
+#define __FOGSOURCE_H
 
 #include <omnetpp.h>
 using namespace omnetpp;
