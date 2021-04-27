@@ -248,7 +248,7 @@ namespace fog {
             if (job->getExpectedLoad()>0){
                 float delta=(job->getExpectedLoad())-(localLoad->getLowestLoad());
                 emit(jobQueryLoadErrorSignal, (double) delta);
-                emit(jobAbsQueryLoadErrorSignal, (double) abs(delta));
+                emit(jobAbsQueryLoadErrorSignal, (double) std::abs(delta));
             }
         }
 
