@@ -7,8 +7,8 @@
 // `license' for details on this and other legal matters.
 //
 
-#ifndef __CLOUDAPPSERVER_H
-#define __CLOUDAPPSERVER_H
+#ifndef __FOGPU_H
+#define __FOGPU_H
 
 #include <omnetpp.h>
 #include "../../queueinglib/QueueingDefs.h"
@@ -68,7 +68,7 @@ class FogPU : public cSimpleModule
         // but we record it differently
         int droppedJobsSLA;
         void changeState(int transition);
-        void processCloudCongestionUpdateMessage(cMessage *msg);
+        void processCongestionUpdateMessage(cMessage *msg);
         void processEndServiceMessage(cMessage *msg);
         void processFogAppJobMessage(cMessage *msg);
         void processContextSwitchMessage(cMessage *msg);

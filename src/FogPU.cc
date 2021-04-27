@@ -10,7 +10,7 @@
 #include <exception>
 #include "FogPU.h"
 #include "FogJob_m.h"
-#include "CloudCongestionUpdate_m.h"
+#include "CongestionUpdate_m.h"
 #include "msgTypes.h"
 
 using namespace omnetpp;
@@ -125,11 +125,11 @@ void FogPU::scheduleNextEvent()
     }
 }
 
-void FogPU::processCloudCongestionUpdateMessage(cMessage *msg)
+void FogPU::processCongestionUpdateMessage(cMessage *msg)
 {
-    CloudCongestionUpdate *umsg = check_and_cast<CloudCongestionUpdate *>(msg);
+    CongestionUpdate *umsg = check_and_cast<CongestionUpdate *>(msg);
     double oldCongestionMultiplier = congestionMultiplier;
-    EV << "processCloudCongestionUpdateMessage(cong=" << umsg->getMultiplier() << ")\n";
+    EV << "processCongestionUpdateMessage(cong=" << umsg->getMultiplier() << ")\n";
     simtime_t remainingTime = 0.0;
     simtime_t now;
     now = simTime();
@@ -357,7 +357,7 @@ void FogPU::handleMessage(cMessage *msg)
             {
                 if (strcmp(msg->getArrivalGate()->getName(), CONGESTIONGATENAME) == 0)
                 {
-                    processCloudCongestionUpdateMessage(msg);
+                    processCongestionUpdateMessage(msg);
                 }
                 else
                 {
