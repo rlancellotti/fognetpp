@@ -1,17 +1,16 @@
-#ifndef __FOG_CLASSIFIER_H
-#define __FOG_CLASSIFIER_H
-
 #include <omnetpp.h>
 
+#ifndef __FOG_MERGE_H
+#define __FOG_MERGE_H
 using namespace omnetpp;
+
 namespace fog {
 
 /**
- * See the NED declaration for more info.
+ * All messages received on any input gate will be sent out on the output gate
  */
-class  FogAppClassifier : public cSimpleModule
+class FogMerge : public cSimpleModule
 {
-    private:
     protected:
         virtual void handleMessage(cMessage *msg) override;
 };
@@ -19,3 +18,4 @@ class  FogAppClassifier : public cSimpleModule
 }; //namespace
 
 #endif
+
