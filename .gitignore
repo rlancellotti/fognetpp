@@ -22,3 +22,7 @@ out/*
 .nedfolders
 src/Makefile
 simulations/Runfile
+src/fog_dbg
+simulations/.cmdenv-log
+simulations/.qtenvrc
+simulations/.tkenvrc
