@@ -17,6 +17,7 @@ package fog.simulations;
 
 import ned.DelayChannel;
 import ned.DatarateChannel;
+import fog.VariableDelayChannel;
 import fog.IFogNode;
 import fog.FogNode;
 import fog.FogAppClassifier;
@@ -28,19 +29,24 @@ import fog.LoadOracle;
 //
 // Sample network, consisting of a source and a sink.
 //
+
+
 network FogMeshNetworkDelay
 {
-    parameters:
+	parameters:
         int nSources = default(5);
         int nClasses = default(1);
 		// FIXME: must use variable delay 
         double linkdelay @unit(s) = default(1s);
-        source[*].suggestedTime=default(normal(1s, 0.1s));
-        source[*].sendInterval=default(exponential(1s));
+        source[*].suggestedTime=default(truncnormal(1s, 0.1s));
+        source[*].sendInterval=default(exponential(1.1s));
         fog[*].nServers=default(1);
         fog[*].server[*].serviceTime = -1s;
         fog[*].server[*].timeout = default(-1s); // disable timeout
-
+    types:
+        channel C extends VariableDelayChannel {
+			delay=truncnormal(linkdelay, 0.1*linkdelay);
+        }
     submodules:
         source[nSources]: FogSource;
         fog[nSources]: <default("FogNode")> like IFogNode;
@@ -59,8 +65,8 @@ network FogMeshNetworkDelay
         // add delay
         for i=0..nSources-2, for j=i+1..nSources-1 {
             // FIXME: must use variable delay 
-            fog[i].toNeighbors++ --> {delay = linkdelay;} --> fog[j].fromNeighbors++;
-            fog[j].toNeighbors++ --> {delay = linkdelay;} --> fog[i].fromNeighbors++;
+            fog[i].toNeighbors++ --> C --> fog[j].fromNeighbors++;
+            fog[j].toNeighbors++ --> C --> fog[i].fromNeighbors++;
         }
 
 }

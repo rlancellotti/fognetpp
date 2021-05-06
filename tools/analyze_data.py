@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # analyze_data V2.0
 import argparse
+import pathlib
 import json
 import sqlite3
 import numpy as np
@@ -68,6 +69,7 @@ def get_values(conn, scenario_ids, metrics):
 def do_analysis(conn, analysis):
     # print(analysis, type(analysis))
     outfile = analysis["outfile"]
+    pathlib.Path(outfile).parent.mkdir(parents=True, exist_ok=True)
     f = open(outfile, "w")
     scenarios = get_scenarios(conn, analysis["scenarios"])
     header = None

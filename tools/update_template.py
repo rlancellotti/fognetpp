@@ -7,7 +7,7 @@ from mako.runtime import Context
 from io import StringIO
 
 def get_filename(ftemplate):
-    return ftemplate.replace('_template', '')
+    return ftemplate.replace('.mako', '')
 
 def should_update(ftemplate):
     fout = get_filename(ftemplate)
@@ -20,17 +20,15 @@ def process_template(ftemplate, force_update=True):
     fout = get_filename(ftemplate)
     if force_update or should_update(ftemplate):
         mytemplate=Template(filename=ftemplate)
-        print ('[updating] %s' % ftemplate)
+        print ('[updating] %s -> %s' % (ftemplate, fout))
         with open(fout, "w") as f:
             f.write(mytemplate.render())
     else:
-        print ('[keeping]  %s' % ftemplate)
+        print ('[keeping]  %s' % fout)
 
 
 for f in os.listdir("./"):
-    if re.match("^[a-zA-Z0-9_\-\.]+?_template\.[a-zA-Z0-9\-]+?$", f) and not f.endswith(".py"):
+    if f.endswith(".mako"):
         # print("found match: %s" % f) 
         process_template(f, force_update=False)
-
-#process_template("configDanilo_template.json")
 
