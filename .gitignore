@@ -9,7 +9,9 @@
 *.a
 *_m.cc
 *_m.h
+*.db
 fog
+fog_dbg
 out/*
 *.sca
 *.vec
@@ -22,7 +24,5 @@ out/*
 .nedfolders
 src/Makefile
 simulations/Runfile
-src/fog_dbg
-simulations/.cmdenv-log
-simulations/.qtenvrc
-simulations/.tkenvrc
+simulations/.*
+simulations/analysis
