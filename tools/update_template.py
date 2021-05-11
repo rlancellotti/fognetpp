@@ -2,9 +2,16 @@
 import os
 import re
 import json
+import argparse
 from mako.template import Template
 from mako.runtime import Context
 from io import StringIO
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-f', '--force', action='store_true', help='force update')
+parser.add_argument('-d', '--dir', help='database file, Default ./')
+
+args = parser.parse_args()
 
 def get_filename(ftemplate):
     return ftemplate.replace('.mako', '')
@@ -27,8 +34,10 @@ def process_template(ftemplate, force_update=True):
         print ('[keeping]  %s' % fout)
 
 
-for f in os.listdir("./"):
+dirname = args.dir if args.dir else "./"
+
+for f in os.listdir(dirname):
     if f.endswith(".mako"):
         # print("found match: %s" % f) 
-        process_template(f, force_update=False)
+        process_template(f, force_update=args.force)
 

@@ -10,7 +10,7 @@ cleanall: checkmakefiles
 	rm -f src/Makefile
 
 makefiles:
-	cd src && opp_makemake -f --deep
+	cd src && opp_makemake -f --deep -o fognetpp
 
 checkmakefiles:
 	@if [ ! -f src/Makefile ]; then \
