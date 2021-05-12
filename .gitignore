@@ -10,8 +10,8 @@
 *_m.cc
 *_m.h
 *.db
-fog
-fog_dbg
+fognetpp
+fognetpp_dbg
 out/*
 *.sca
 *.vec
