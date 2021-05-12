@@ -9,6 +9,7 @@ from io import StringIO
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-f', '--force', action='store_true', help='force update')
+parser.add_argument('-r', '--recursive', action='store_true', help='recursive')
 parser.add_argument('-d', '--dir', help='database file, Default ./')
 
 args = parser.parse_args()
@@ -33,11 +34,18 @@ def process_template(ftemplate, force_update=True):
     else:
         print ('[keeping]  %s' % fout)
 
+def process_directory(dirname, force_update=True, recursive=False):
+    #print("working into directory %s (force_update=%s, recursive=%s)" % (dirname, force_update, recursive))
+    for f in os.listdir(dirname):
+        f=dirname+"/"+f
+        if f.endswith(".mako"):
+            # print("found match: %s" % f) 
+            process_template(f, force_update=force_update)
+        if os.path.isdir(f):
+            #print("recursing into directory %s" % f)
+            process_directory(f, force_update=force_update, recursive=recursive)
+    #print("done with directory %s" % dirname)
 
-dirname = args.dir if args.dir else "./"
 
-for f in os.listdir(dirname):
-    if f.endswith(".mako"):
-        # print("found match: %s" % f) 
-        process_template(f, force_update=args.force)
-
+dirname = args.dir if args.dir else "."
+process_directory(dirname, force_update=args.force, recursive=args.recursive)
