@@ -58,4 +58,4 @@ def process_directory(dirname, force_update=True, recursive=False, conf=None):
 dirname = args.dir if args.dir else "."
 #print("recursive: "+str(args.recursive)+", force: "+str(args.force))
 conf = get_configuration(args.config) if args.config else None
-process_directory(dirname, force_update=args.force, recursive=args.recursive, conf=conf)
+process_directory(dirname, force_update=(args.force or args.config), recursive=args.recursive, conf=conf)
