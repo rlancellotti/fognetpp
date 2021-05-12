@@ -1,8 +1,8 @@
 #ifndef __VARIABLEDELAYCHANNEL_H
 #define __VARIABLEDELAYCHANNEL_H
 
-#include "omnetpp/cchannel.h"
-
+#include <omnetpp/cchannel.h>
+#include "FogLoadBalancer.h"
 using namespace omnetpp;
 
 namespace fog {
@@ -17,11 +17,13 @@ class VariableDelayChannel : public cChannel //implies noncopyable
     static simsignal_t messageSentSignal;
     static simsignal_t messageDiscardedSignal;
 
+
   private:
     enum {
       FL_ISDISABLED = 1 << 10,
       FL_DELAY_NONZERO = 1 << 11,
     };
+    double queryDelayScale;
 
   private:
     // internal: checks whether parameters have been set up

@@ -81,7 +81,7 @@ void FogSource::handleMessage(cMessage *msg)
 }
 
 const char *FogSource::getJobName(){
-    return "job";
+    return par("jobName");
 }
 
 

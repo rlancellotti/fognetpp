@@ -208,13 +208,13 @@ namespace fog {
                 delete msg;
             }
             //In case incoming msg is a probeQuery
-            else if (strcmp(msg->getName(), "probeQuery") == 0) {
+            else if (strcmp(msg->getName(), getProbeQueryName()) == 0) {
                 ProbeQuery *probeQuery = check_and_cast<ProbeQuery *>(msg);
                 processProbeQuery(probeQuery);
                 delete msg;
             }
             //In case incoming msg is a probeAnswer
-            else if (strcmp(msg->getName(), "probeAnswer") == 0) {
+            else if (strcmp(msg->getName(), getAnswerName()) == 0) {
                 ProbeAnswer *answer = check_and_cast<ProbeAnswer *>(msg);
                 processProbeAnswer(answer);
                 delete msg;

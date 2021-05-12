@@ -28,6 +28,7 @@ void VariableDelayChannel::initialize()
 void VariableDelayChannel::rereadPars()
 {
     setFlag(FL_ISDISABLED, par("disabled"));
+    queryDelayScale = par("queryDelayScale");
 }
 
 void VariableDelayChannel::handleParameterChange(const char *)
@@ -57,6 +58,12 @@ void VariableDelayChannel::processMessage(cMessage *msg, simtime_t t, result_t& 
 
     // propagation delay modeling
     result.delay = par("delay");
+    // scale delay for query messages
+    if (queryDelayScale >0 &&
+        ((strcmp(msg->getName(), FogLoadBalancer::getAnswerName()) == 0) ||
+         (strcmp(msg->getName(), FogLoadBalancer::getProbeQueryName()) == 0))){
+        result.delay *= queryDelayScale;
+    }
 
     // emit signals
     if (mayHaveListeners(messageSentSignal)) {

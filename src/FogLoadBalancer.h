@@ -74,6 +74,8 @@ class FogLoadBalancer : public cSimpleModule
     public:
         FogLoadBalancer();
         virtual ~FogLoadBalancer();
+        static const char *getAnswerName();
+        static const char *getProbeQueryName();
 
     protected:
         int nServers;       //PU number
@@ -158,9 +160,6 @@ class FogLoadBalancer : public cSimpleModule
 
         //void dumpStat(std::map<int, int> *map, std::string name);
         virtual void finish();
-
-        static const char *getAnswerName();
-        static const char *getProbeQueryName();
 
 
 };

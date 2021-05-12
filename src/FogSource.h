@@ -36,7 +36,7 @@ class FogSource : public cSimpleModule
   public:
      FogSource();
      virtual ~FogSource();
-     static const char *getJobName();
+     const char *getJobName();
 
   protected:
     virtual void initialize();
