@@ -23,7 +23,7 @@ class VariableDelayChannel : public cChannel //implies noncopyable
       FL_ISDISABLED = 1 << 10,
       FL_DELAY_NONZERO = 1 << 11,
     };
-    double queryDelayScale;
+    double probeDelayScale;
 
   private:
     // internal: checks whether parameters have been set up

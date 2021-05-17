@@ -22,5 +22,5 @@ channel VariableDelayChannel {
     @class("VariableDelayChannel");
     volatile double delay @unit(s)=default(0s);
     bool disabled=default(false);
-    double queryDelayScale=default(1.0);
+    double probeDelayScale=default(1.0);
 }
