@@ -38,6 +38,7 @@ network FogMeshNetworkDelay
         int nClasses = default(1);
 		// FIXME: must use variable delay 
         double linkdelay @unit(s) = default(1s);
+        double etaP = default(0.1);
         source[*].suggestedTime=default(truncnormal(1s, 0.1s));
         source[*].sendInterval=default(exponential(1.1s));
         fog[*].nServers=default(1);
@@ -46,6 +47,7 @@ network FogMeshNetworkDelay
     types:
         channel C extends VariableDelayChannel {
 			delay=truncnormal(linkdelay, 0.1*linkdelay);
+            probeDelayScale=etaP/2;
         }
     submodules:
         source[nSources]: FogSource;

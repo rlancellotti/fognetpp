@@ -44,11 +44,11 @@ def parse_run(l):
 
 
 def parse_param(l):
-    return {"type": l[0], "object": l[1], "value": l[2]}
+    return {"type": l[0], "object": l[1], "value": l[2].replace('"', '')}
 
 
 def parse_scalar(l):
-    return {"type": l[0], "object": l[1], "name": l[2], "value": l[3]}
+    return {"type": l[0], "object": l[1], "name": l[2], "value": l[3].replace('"', '')}
 
 
 def parse_statistic(l):
@@ -101,10 +101,10 @@ def parse_sca(scafile):
     return data
 
 
-#### End: Code do load the SCA file in a data structure ####
+#### End: Code to load the SCA file in a data structure ####
 
 
-#### Code do search records in the SCA file data ####
+#### Code to search records in the SCA file data ####
 
 def to_regexp(pattern):
     rv =[]
