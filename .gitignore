@@ -23,6 +23,9 @@ out/*
 .project
 .nedfolders
 src/Makefile
+simulations/*
 simulations/Runfile
 simulations/.*
 simulations/analysis
+simulations/*.json
+simulations/*.ini
