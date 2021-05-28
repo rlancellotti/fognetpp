@@ -8,6 +8,7 @@ import json
 import sqlite3
 import shlex
 import re
+import gzip
 from multiprocessing import Pool
 
 
@@ -85,11 +86,26 @@ def add_second_level(top_rec, second_rec):
         top_rec[second_rec["type"]].append(second_rec)
 
 
+def open_sca(scafile):
+    print('opening file: %s' % scafile)
+    f=None
+    if scafile.endswith('.sca'):
+        print ('detected uncompressed sca file')
+        f=open(scafile)
+    if scafile.endswith('.sca.gz'):
+        print ('detected sca.gz file')
+        f=gzip.open(scafile)
+    return f
+
 def parse_sca(scafile):
     data={}
-    with open(scafile) as f:
+    with open_sca(scafile) as f:
         lastrec = None
         for line in f:
+            # if reading from compressed input, need to convert into tring
+            if not isinstance(line, str):
+                line=line.decode('utf-8')
+            # otherwise no need to convert enything
             l = shlex.split(line)
             if len(l) > 1:
                 if is_top_level(l):
@@ -173,7 +189,7 @@ def extract_field(collection, fieldname):
     return rv
 
 
-#### End: Code do search records in the SCA file data ####
+#### End: Code to search records in the SCA file data ####
 
 
 def load_config(configname):
@@ -181,13 +197,13 @@ def load_config(configname):
         return json.load(f)
 
 
-def get_element(scaname, record_type, match):
-    with open(scaname, 'r') as f:
-            for line in f:
-                l=line.split()
-                if len(l)>1:
-                    if l[0] == record_type and l[1] == match:
-                        return l[2]
+#def get_element(scaname, record_type, match):
+#    with open(scaname, 'r') as f:
+#            for line in f:
+#                l=line.split()
+#                if len(l)>1:
+#                    if l[0] == record_type and l[1] == match:
+#                        return l[2]
 
 def get_scenario(scadata, schema):
     s={}
@@ -283,8 +299,6 @@ def process_sca(scaname, config):
     schema = config["scenario_schema"]
     metrics = config["metrics"]
     scadata = parse_sca(scaname)
-    #with open(scaname.replace('.sca','.json'), 'w') as f:
-    #    json.dump(scadata, f, indent=4)
     scenario = get_scenario(scadata, schema)
     val = []
     for m in metrics:
@@ -295,8 +309,7 @@ def process_sca(scaname, config):
 def list_sca(scaname, config):
     return (scaname, len(config))
 
-#FIXME: we should support a wide range of scanames without any switch!
-#scaname = args.input if args.input else "test.sca"
+
 configname = args.config if args.config else "config.json"
 dbname = args.db if args.db else "test.db"
 config = load_config(configname)
