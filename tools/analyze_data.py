@@ -9,6 +9,8 @@ import numpy as np
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--config', help='.json file, Default config.json')
 parser.add_argument('-d', '--db', help='database file, Default test.db')
+parser.add_argument('-v', '--verbose', action='store_true', help='verbose operation')
+
 #parser.add_argument('-n', '--no-header', dest='noheader', const=True, default=False, action='store_const', help='do not print header')
 args = parser.parse_args()
 
@@ -98,7 +100,11 @@ dbname = args.db if args.db else "test.db"
 config = load_config(configname)
 conn = sqlite3.connect(dbname)
 analyses = config["analyses"]
+if args.verbose:
+    print("Analyzing data from %s using config %s" %(dbname, configname))
 for a in analyses:
+    if args.verbose:
+        print(a)
     do_analysis(conn, analyses[a])
 
 #"analyses": {
