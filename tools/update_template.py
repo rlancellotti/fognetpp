@@ -12,7 +12,7 @@ from io import StringIO
 parser = argparse.ArgumentParser()
 parser.add_argument('-f', '--force', action='store_true', help='force update')
 parser.add_argument('-r', '--recursive', action='store_true', help='enable recursive search')
-parser.add_argument('-d', '--dir', help='database file, Default ./')
+parser.add_argument('-d', '--dir', help='directory to work on, Default ./')
 parser.add_argument('-c', '--config', help='YAML Configuration file, default None')
 
 args = parser.parse_args()
