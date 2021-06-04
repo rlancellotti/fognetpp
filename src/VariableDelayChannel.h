@@ -116,7 +116,11 @@ class VariableDelayChannel : public cChannel //implies noncopyable
      * to reading the "disabled" parameter, via par("disabled").
      * A disabled channel discards all messages sent on it.
      */
-    virtual bool isDisabled() const  {checkState(); return flags & FL_ISDISABLED;}
+#if OMNETPP_VERSION >= 0x0600
+    virtual bool isDisabled() const override {checkState(); return flags & FL_ISDISABLED;}
+#else
+    virtual bool isDisabled() const {checkState(); return flags & FL_ISDISABLED;}
+#endif
     //@}
 
     /** @name Implementation methods */
