@@ -38,6 +38,9 @@ FogPU::~FogPU()
     cancelAndDelete(contextSwitchMsg);
     cancelAndDelete(timeoutMsg);
     // ???? 
+#if OMNETPP_VERSION >= 0x0600
+    // FIXME: should implement the code using cSoftOwner instead of defaultList(?)
+#else
     int OwnedSize = this->defaultListSize();
     for (int i = 0; i < OwnedSize; i++)
     {
@@ -49,7 +52,7 @@ FogPU::~FogPU()
             Del = NULL;
         }
     }
-
+#endif
 }
 
 void FogPU::initialize()
