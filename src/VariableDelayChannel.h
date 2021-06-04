@@ -130,7 +130,12 @@ class VariableDelayChannel : public cChannel //implies noncopyable
      * This implementation delivers the message to the opposite gate
      * with a delay.
      */
+#if OMNETPP_VERSION >= 0x0600
+    virtual Result processMessage(cMessage *msg, const SendOptions& options, simtime_t t) override;
+#else
     virtual void processMessage(cMessage *msg, simtime_t t, result_t& result) override;
+#endif
+
     //@}
 };
 
