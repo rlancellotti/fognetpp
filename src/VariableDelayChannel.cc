@@ -46,14 +46,22 @@ void VariableDelayChannel::setDisabled(bool d)
     par("disabled").setBoolValue(d);
 }
 
-void VariableDelayChannel::processMessage(cMessage *msg, simtime_t t, result_t& result)
-{
+#if OMNETPP_VERSION >= 0x0600
+cChannel::Result VariableDelayChannel::processMessage(cMessage *msg, const SendOptions& options, simtime_t t) {
+    Result result;
+#else
+void VariableDelayChannel::processMessage(cMessage *msg, simtime_t t, result_t& result) {
+#endif
     // if channel is disabled, signal that message should be deleted
     if (flags & FL_ISDISABLED) {
         result.discard = true;
         cTimestampedValue tmp(t, msg);
         emit(messageDiscardedSignal, &tmp);
+#if OMNETPP_VERSION >= 0x0600
+        return result;
+#else
         return;
+#endif
     }
 
     // propagation delay modeling
@@ -70,6 +78,9 @@ void VariableDelayChannel::processMessage(cMessage *msg, simtime_t t, result_t& 
         MessageSentSignalValue tmp(t, msg, &result);
         emit(messageSentSignal, &tmp);
     }
+#if OMNETPP_VERSION >= 0x0600
+    return result;
+#endif
 }
 
 }  // namespace fog
