@@ -21,6 +21,7 @@ package fog;
 simple FogSource
 {
     parameters:
+        @display("i=block/source");
         volatile double sendInterval @unit(s) = default(exponential(1s));
         // parameters for face detection task 
         volatile double suggestedTime @unit(s) = default(-1s);
@@ -31,7 +32,6 @@ simple FogSource
         int appId = default(0);
         bool realTime = default(false); //If 1 -> realtime 
         string jobName =default("job")    
-        @display("i=block/source");
         @signal[sentJob](type="long");
         @statistic[sentJob](title="sent event";record=vector?,count;interpolationmode=none);
         
