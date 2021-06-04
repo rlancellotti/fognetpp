@@ -48,6 +48,7 @@ for c in cp.sections():
     if (c.startswith('Config ') and 'Base' not in c):
         configs.append(c.split()[1])
 targetlist=[]
+print('writing %d configurations with %d runs each' %(len(configs), nrun))
 with open(outfile, 'w+') as f:
     for c in configs:
         for r in range(0, nrun):
