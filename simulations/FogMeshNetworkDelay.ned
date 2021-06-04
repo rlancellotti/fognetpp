@@ -65,7 +65,6 @@ network FogMeshNetworkDelay
         classifier.rest --> sink[nClasses].in++;
         // add delay
         for i=0..nSources-2, for j=i+1..nSources-1 {
-            // FIXME: must use variable delay 
             fog[i].toNeighbors++ --> C --> fog[j].fromNeighbors++;
             fog[j].toNeighbors++ --> C --> fog[i].fromNeighbors++;
         }
