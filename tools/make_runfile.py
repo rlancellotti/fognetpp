@@ -23,7 +23,7 @@ def write_target(f, scaname, inifile='omnetpp.ini', sleeptime=1):
     compression = scaname.endswith('.gz')
     (basename, conf, run)=from_scaname(scaname)
     f.write('%s: %s\n' % (scaname, inifile))
-    f.write('\trm -f %s.sca %s.sca.gz %s.vec %s.vci\n'%(basename, basename, basename, basename))
+    f.write('\trm -f results/%s.sca results/%s.sca.gz results/%s.vec results/%s.vci\n'%(basename, basename, basename, basename))
     f.write('\t./run -u Cmdenv -c %s -r %s -f %s --cmdenv-performance-display=false --cmdenv-status-frequency=60s -s\n'%(conf, run, inifile))
     f.write('\tsleep %d\n'%sleeptime)
     if compression:
