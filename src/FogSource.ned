@@ -31,7 +31,7 @@ simple FogSource
         double maxInterval @unit(s) = default(-1s);
         int appId = default(0);
         bool realTime = default(false); //If 1 -> realtime 
-        string jobName =default("job")    
+        string jobName =default("job");  
         @signal[sentJob](type="long");
         @statistic[sentJob](title="sent event";record=vector?,count;interpolationmode=none);
         
