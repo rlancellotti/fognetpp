@@ -30,8 +30,8 @@ moduleinterface IFogLoadBalancer{
     gates:
         input in[];
         input localLoad[];
-        input loadFromNeighbor[];
-        output loadToNeighbor[];
+        //input loadFromNeighbor[];
+        inout neighbor[];
         output out[];
 }
 
@@ -76,7 +76,8 @@ simple FogLoadBalancer like IFogLoadBalancer
     gates:
         input in[];
         input localLoad[];
-        input loadFromNeighbor[];
-        output loadToNeighbor[];
+        //input loadFromNeighbor[];
+        //output loadToNeighbor[];
+        inout neighbor[];
         output out[];
 }
