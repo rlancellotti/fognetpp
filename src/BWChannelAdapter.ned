@@ -18,6 +18,6 @@ simple BWChannelAdapter
 
         int capacity = default(-1);    // negative capacity means unlimited queue
     gates:
-        input in;
-        output out;
+        inout internal;
+        inout external;
 }

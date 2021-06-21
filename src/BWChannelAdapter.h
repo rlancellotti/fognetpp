@@ -18,10 +18,11 @@ class BWChannelAdapter : public cSimpleModule
 		simsignal_t busySignal;
         simsignal_t droppedSignal;
 
-        cPacket *pkt;
         cMessage *channelFreeMsg;
         cQueue queue;
-        cChannel *outChannel;
+        cChannel *extChannel;
+        int externalGateId;
+        int internalGateId;
         int capacity;
         std::map<int, simtime_t> arrivalTimestamp;
 
@@ -36,7 +37,7 @@ class BWChannelAdapter : public cSimpleModule
         virtual void finish() override;
 
     private:
-        cChannel *getOutChannel();
+        cChannel *getExtChannel();
 
 };
 
