@@ -90,10 +90,10 @@ def open_sca(scafile):
     print('opening file: %s' % scafile)
     f=None
     if scafile.endswith('.sca'):
-        print ('detected uncompressed sca file')
+        #print ('detected uncompressed sca file')
         f=open(scafile)
     if scafile.endswith('.sca.gz'):
-        print ('detected sca.gz file')
+        #print ('detected sca.gz file')
         f=gzip.open(scafile)
     return f
 
@@ -147,7 +147,7 @@ def match_field(field, pattern):
 def match_record(record, pattern):
     for field in pattern:
         if not match_field(record[field], pattern[field]):
-            #print ("!! failed match", record[field], pattern[field])
+            # print ("!! failed match", record[field], pattern[field])
             return False
     return True
 
@@ -163,6 +163,7 @@ def search_in_collection(collection, pattern):
 
 
 def search(data, toplevel_pattern, secondlevel_pattern=None):
+    # print(toplevel_pattern, secondlevel_pattern)
     if toplevel_pattern['type'] in data.keys():
         collection = data[toplevel_pattern['type']]
         toplevel_records = search_in_collection(collection, toplevel_pattern)
@@ -190,7 +191,6 @@ def extract_field(collection, fieldname):
 
 
 #### End: Code to search records in the SCA file data ####
-
 
 def load_config(configname):
     with open(configname) as f:
@@ -251,18 +251,47 @@ def get_metric_value(scadata, metric):
     return v
 
 
+def get_bins(hist):
+    bins=hist.get('bin', [])
+    # convert strings to numbers; remove underflow bucket '-inf'
+    newbins=[ {'value': float(x['value']), 'samples': float(x['samples'])} for x in bins if x['value']!='-inf' ]
+    return newbins
+
+
+def aggregate_histogram(hists):
+    # FIXME: should merge histograms using averages and splines
+    if hists is not None and len(hists)>0:
+        return json.dumps(hists[0])
+    else:
+        return '[]'
+
+
+def get_histogram(scadata, histogram):
+    #print(json.dumps(histogram, indent=4))
+    hists=search(scadata, {'type': 'statistic', 'object': histogram['module'], 'name': histogram['histogram_name']})
+    # we are looking for the bins, but they are a vector: conversion to JSON string
+    rv=[get_bins(h) for h in hists]
+    return aggregate_histogram(rv)
+
+
 def init_db(conn, schema):
     c = conn.cursor()
     #get the count of tables with the name
+    # table sceanrio
     c.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='scenario' ''')
     if c.fetchone()[0]!=1:
         descr = None
         for p in schema:
             descr = "%s, %s %s" % (descr, p, schema[p]["type"]) if descr is not None else "%s %s" % (p, schema[p]["type"])
         c.execute('''CREATE TABLE 'scenario' (name text, run int, %s) ''' % descr)
+    # table values
     c.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='value' ''')
     if c.fetchone()[0]!=1:
         c.execute('''CREATE TABLE 'value' (scenarioid int, metric text, aggregation text, value real, FOREIGN KEY(scenarioid) REFERENCES scenario(rowid) )''')
+    # table histograms
+    c.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='histogram' ''')
+    if c.fetchone()[0]!=1:
+        c.execute('''CREATE TABLE 'histogram' (scenarioid int, histogram text, bins text, FOREIGN KEY(scenarioid) REFERENCES scenario(rowid) )''')    
     conn.commit()
 
 def save_scenario(conn, scenario):
@@ -293,17 +322,35 @@ def save_metric(conn, values, metric, scenario_id):
             c.execute('''INSERT INTO 'value' (scenarioid, metric, aggregation, value) VALUES ('%s', '%s', '%s', '%s')''' % (scenario_id, metric, v, values[v]))
             conn.commit()
 
+
+def save_histogram(conn, bins, histogram, scenario_id):
+    c = conn.cursor()
+    c.execute('''SELECT count(*) FROM 'histogram' WHERE scenarioid = '%s' AND histogram = '%s' ''' % (scenario_id, histogram))
+    if c.fetchone()[0]!=1:
+        c.execute('''INSERT INTO 'histogram' (scenarioid, histogram, bins) VALUES ('%s', '%s', '%s')''' % (scenario_id, histogram, bins))
+        conn.commit()
+
+
 def process_sca(scaname, config):
     # parse sca file and return relevant info
     print(scaname)
-    schema = config["scenario_schema"]
-    metrics = config["metrics"]
+    schema = config['scenario_schema']
+    metrics = config['metrics']
+    histograms = config.get('histograms', {})
     scadata = parse_sca(scaname)
+    #with open(os.path.basename(scaname)+'.json', 'w') as jdump:
+    #    json.dump(scadata, jdump, indent=4)
     scenario = get_scenario(scadata, schema)
-    val = []
-    for m in metrics:
-        val.append({"metric": m, "values": get_metric_value(scadata, metrics[m])})
-    return {"scenario": scenario, "metrics":val}
+    val = [{'metric': m, 'values': get_metric_value(scadata, metrics[m])} for m in metrics]
+    #for m in metrics:
+    #    val.append({'metric': m, "values": get_metric_value(scadata, metrics[m])})
+    hst = [{'histogram': h, 'bins': get_histogram(scadata, histograms[h])} for h in histograms]
+    #FIXME: must add management of histograms
+    #for h in histograms:
+    #    #hst.append({})
+    #    print(json.dumps(get_histogram(scadata, histograms[h]), indent=4))
+    print(hst)
+    return {'scenario': scenario, 'metrics': val, 'histograms': hst}
 
 
 def list_sca(scaname, config):
@@ -338,9 +385,12 @@ init_db(conn, schema)
 for res in results:
     scenario_id = save_scenario(conn, res["scenario"])
     metrics = res["metrics"]
+    histograms = res["histograms"]
     for m in metrics:
         #print(m["metric"])
         #print(m["values"])
         #print(scenario_id)
-        save_metric(conn, m["values"], m["metric"], scenario_id)
+        save_metric(conn, m['values'], m['metric'], scenario_id)
+    for h in histograms:
+        save_histogram(conn, h['bins'], h['histogram'], scenario_id)
 

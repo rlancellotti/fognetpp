@@ -33,7 +33,7 @@ def aggregate_scenarios(sceanrios):
 
 def get_scenarios(conn, scenarios):
     c = conn.cursor()
-    range_params = scenarios["range"]
+    range_params = scenarios.get("range", [])
     fixed_params = scenarios["fixed"]
     where_clause = None
     for p in fixed_params:
@@ -41,10 +41,13 @@ def get_scenarios(conn, scenarios):
     extract_clause = None
     for p in range_params:
         extract_clause = "%s, %s" % (extract_clause, p) if extract_clause is not None else "%s" % (p)
+    # print(extract_clause)
     if where_clause is not None:
-        query = ''' SELECT rowid, name, run, %s FROM scenario WHERE %s ORDER BY %s ''' % (extract_clause, where_clause, extract_clause)
+        query = ''' SELECT rowid, name, run%s FROM scenario WHERE %s %s ''' % (', ' + extract_clause if extract_clause is not None else '',
+                                                                where_clause, 'ORDER BY ' + extract_clause if extract_clause is not None else '')
     else:
-        query = ''' SELECT rowid, name, run, %s FROM scenario ORDER BY %s ''' % (extract_clause, extract_clause)
+        query = ''' SELECT rowid, name, run%s FROM scenario %s ''' % (', ' + extract_clause if extract_clause is not None else '', 
+                                                                'ORDER BY ' + extract_clause if extract_clause is not None else '')
     #print(query)
     c.execute(query)
     rv = aggregate_scenarios(c.fetchall())
@@ -70,7 +73,7 @@ def get_values(conn, scenario_ids, metrics):
 
 def do_analysis(conn, analysis):
     # print(analysis, type(analysis))
-    outfile = analysis["outfile"]
+    outfile = analysis.get("outfile")
     pathlib.Path(outfile).parent.mkdir(parents=True, exist_ok=True)
     f = open(outfile, "w")
     scenarios = get_scenarios(conn, analysis["scenarios"])
@@ -94,6 +97,30 @@ def do_analysis(conn, analysis):
         # print(out)
     f.close()
 
+def get_bins(conn, sid, histogram_name):
+    c = conn.cursor()
+    query = ''' SELECT bins FROM histogram WHERE scenarioid = '%s' AND histogram = '%s' ''' % (sid, histogram_name)
+    #print(query)
+    c.execute(query)
+    bins=json.loads(c.fetchone()[0])
+    return bins
+
+def do_histogram(conn, analysis):
+    #print('histogram: '+ str(analysis))
+    outfile = analysis.get("outfile")
+    pathlib.Path(outfile).parent.mkdir(parents=True, exist_ok=True)
+    scenarios = get_scenarios(conn, {'fixed': analysis['scenario']})
+    for s in scenarios:
+        sid=scenarios[s]['sceanrio_ids'][0]
+        #print(sid)
+        bins = get_bins(conn, sid, analysis['histogram'])
+        print(bins)
+        with open(outfile, "w") as f:
+            f.write('#value\tsamples\n')
+            for r in bins:
+                f.write('%f\t%f\n' %(r['value'], r['samples']))
+    return None
+
 
 configname = args.config if args.config else "config.json"
 dbname = args.db if args.db else "test.db"
@@ -105,7 +132,10 @@ if args.verbose:
 for a in analyses:
     if args.verbose:
         print(a)
-    do_analysis(conn, analyses[a])
+    if analyses[a].get('metrics'):
+        do_analysis(conn, analyses[a])
+    if analyses[a].get('histogram'):
+        do_histogram(conn, analyses[a])    
 
 #"analyses": {
 #        "test1": {
