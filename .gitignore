@@ -29,3 +29,4 @@ simulations/.*
 simulations/analysis
 simulations/*.json
 simulations/*.ini
+.vscode/*

@@ -4,8 +4,9 @@ moduleinterface IFogNode{
     gates:
         output out;
         input in[];
-        output toNeighbors[];
-        input fromNeighbors[];
+        //output toNeighbors[];
+        //input fromNeighbors[];
+        inout neighbor[];
 }
 //
 // A subset of VMs processing requests of the same app
@@ -25,20 +26,22 @@ module FogNode like IFogNode
     gates:
         output out;
         input in[];
-        output toNeighbors[];
-        input fromNeighbors[];
+        //output toNeighbors[];
+        //input fromNeighbors[];
+        inout neighbor[];
     submodules:
         dispatcher: <default(FogLoadBalancer)> like IFogLoadBalancer;
         server[nServers]: FogPU;
         merge: FogMerge;
-        adapter[sizeof(fromNeighbors)]: BWChannelAdapter;
+        //adapter[sizeof(fromNeighbors)]: BWChannelAdapter;
     connections allowunconnected:
         in[i] --> dispatcher.in++ for i=0..sizeof(in)-1;
-        for i=0..sizeof(toNeighbors)-1 {
-        	dispatcher.loadToNeighbor++ --> adapter[i].in; 
-        	adapter[i].out --> toNeighbors[i];
+        for i=0..sizeof(neighbor)-1 {
+        	//dispatcher.loadToNeighbor++ --> adapter[i].in; 
+        	//adapter[i].out --> toNeighbors[i];
+            dispatcher.neighbor++ <--> neighbor[i]; 
         } 
-        fromNeighbors[i] --> dispatcher.loadFromNeighbor++ for i=0..sizeof(fromNeighbors)-1;
+        //fromNeighbors[i] --> dispatcher.loadFromNeighbor++ for i=0..sizeof(fromNeighbors)-1;
         for i=0..nServers-1 {
             dispatcher.out++ --> server[i].in++;
             server[i].loadUpdate --> dispatcher.localLoad++;

@@ -125,10 +125,10 @@ namespace fog {
             queueCapacity = par("queue");
 
             // Get neighs number and fill probeGates
-            int probeGateSize = gateSize("loadToNeighbor");
+            int probeGateSize = gateSize("neighbor");
             probeGates.resize(probeGateSize);
             for (int i = 0; i < probeGateSize; i++){probeGates[i] = i;}
-
+            EV << "probeGates[] has size: " << probeGateSize <<endl;
             /*nJobs=0;
             nInternalJobs=0;
             nExternalJobs=0;
@@ -138,12 +138,15 @@ namespace fog {
             nProbes=0;
             nProbeQuery=0;
             nProbeAnswers=0;*/
-
+            // FIXME: change getModulebypath for omentpp6
+#if OMNETPP_VERSION >= 0x0600
+            cModule * mod = findModuleByPath(par("loadOracleName").stringValue());
+#else
             cModule * mod = getModuleByPath(par("loadOracleName").stringValue());
+#endif
             EV<< "getModuleByPath(\"" << par("loadOracleName").stringValue() << "\")->" << mod<<endl;
             if (mod !=nullptr){loadOracle = check_and_cast<LoadOracle*>(mod);}
             EV<<"LoadOracle ptr is: " <<(void *) loadOracle<<endl;
-
             // signals
             droppedSignal = registerSignal("dropped");
             loadSignal = registerSignal("load");
@@ -165,13 +168,13 @@ namespace fog {
     void FogLoadBalancer::sendId(){
         // get module ID
         int id=this->getId();
-        int nports = this->gateSize("loadToNeighbor");
+        int nports = this->gateSize("neighbor");
         for (int i=0; i<nports; i++) {
             // create message(s)
             IdMessage *msg = new IdMessage("idMessage", KIND_OTHER);
             msg->setModuleId(id);
             // send messages to all neighbors
-            send(msg, "loadToNeighbor", i);
+            send(msg, "neighbor$o", i);
             //EV<<"Sending id: " << id << "to neighbor at gate: " << i <<endl;
         }
     }
@@ -276,7 +279,7 @@ namespace fog {
                 std::vector<int> neighs = getNeighbors(getFanout());
                 int neigh = selectNeighbor(neighs);
                 emit(jobForwardPortSignal, neigh);
-                forwardJob(job, (char *) "loadToNeighbor", neigh);
+                forwardJob(job, (char *) "neighbor$o", neigh);
             }
         }
     }
@@ -298,7 +301,7 @@ namespace fog {
         answer->setQueryId(queryId);
         answer->setAppId(appId);
         answer->setByteLength(par("probeAnswerPacketLength"));
-        send(answer, "loadToNeighbor", nGate);
+        send(answer, "neighbor$o", nGate);
     }
 
     void FogLoadBalancer::forwardFromProbe(int queryId) {
@@ -307,7 +310,7 @@ namespace fog {
         int neigh = pd->getLeastLoadedNeigh();
         job->setExpectedLoad(pd->getLowestLoad());
         emit(jobForwardPortSignal, neigh);
-        forwardJob(job, (char *) "loadToNeighbor", neigh);
+        forwardJob(job, (char *) "neighbor$o", neigh);
         pq.deleteFromProbeId(queryId);
     }
 
@@ -394,7 +397,7 @@ namespace fog {
         cGate *senderGate = job->getSenderGate();
         EV<<"Io: "<<this->getId()<<" bouncingBack from: "<< senderGate->getName()<<"["<<senderGate->getIndex()<<"]"<<endl;
         emit(bounceBackSignal, 1);
-        send(job, "loadToNeighbor", senderGate->getIndex());
+        send(job, "neighbor$o", senderGate->getIndex());
     }
 
 
@@ -429,7 +432,7 @@ namespace fog {
      */
     int FogLoadBalancer::getSource(FogJob *job) {
         cGate *gate = job->getArrivalGate();
-        if (strcmp(gate->getName(), "loadFromNeighbor") == 0) {
+        if (strcmp(gate->getName(), "neighbor") == 0) {
             return SRC_NEIGHBOR;
         }
         return SRC_SENSOR;
@@ -531,7 +534,7 @@ namespace fog {
             pquery->setJobId(job->getId());
             pquery->setAppId(job->getAppId());
             pquery->setByteLength(par("probeQueryPacketLength"));
-            send(pquery, (char *) "loadToNeighbor", neighs.at(i));
+            send(pquery, (char *) "neighbor$o", neighs.at(i));
         }
     }
 

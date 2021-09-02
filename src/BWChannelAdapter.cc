@@ -24,24 +24,22 @@ void BWChannelAdapter::initialize()
     channelFreeMsg = new cMessage("channel-free");
     capacity = par("capacity");
     queue.setName("queue");
-    outChannel = getOutChannel();
-    if (outChannel == nullptr){
+    extChannel = getExtChannel();
+    externalGateId=findGate("external$i");
+    internalGateId=findGate("internal$i");
+    if (extChannel == nullptr){
         EV<< "WARNING: Channel Adapter is not needed!" << endl;
     }
 }
 
 
-cChannel * BWChannelAdapter::getOutChannel(){
-    return gate(findGate("out"))->findTransmissionChannel();
+cChannel * BWChannelAdapter::getExtChannel(){
+    return gate(findGate("external$o"))->findTransmissionChannel();
 }
 
 void BWChannelAdapter::handleMessage(cMessage *msg)
 {
-    if (outChannel == nullptr){
-        // just an ideal or delay channel
-        send(msg, "out");
-        return;
-    }
+    // internal message: channel is now free
     if (msg == channelFreeMsg) {
         if (queue.isEmpty()) {
             emit(busySignal, false);
@@ -50,32 +48,44 @@ void BWChannelAdapter::handleMessage(cMessage *msg)
             simtime_t waitingTime, arrivalTime;
             // FIXME: get packet and send it on the channel
             cMessage *pkt = check_and_cast<cMessage *>(queue.pop());
-            send(pkt, "out");
+            send(pkt, "external$o");
             emit(queueLengthSignal, queue.getLength());
             waitingTime=simTime() - arrivalTimestamp[pkt->getId()];
             arrivalTimestamp.erase(pkt->getId());
             emit(queueWaitSignal, waitingTime);
-            scheduleAt(outChannel->getTransmissionFinishTime(), channelFreeMsg);
+            scheduleAt(extChannel->getTransmissionFinishTime(), channelFreeMsg);
         }
     }
-    else {
-        bool busy = outChannel->isBusy();
-        if (! busy) {
-            // channel was idle
-            emit(busySignal, true);
-            send(msg, "out");
-            scheduleAt(outChannel->getTransmissionFinishTime(), channelFreeMsg);
-        }
-        else {
-            // check for container capacity
-            if (capacity >= 0 && queue.getLength() >= capacity) {
-                emit(droppedSignal, 1);
-                delete msg;
-                return;
+    // traffic external->internal passes without changes
+    if (msg->getArrivalGateId() == externalGateId){
+        send(msg, "internal$o");
+        return;
+    }
+    // traffic internal->external is queued if channel is a BW channel
+    if (msg->getArrivalGateId() == internalGateId){
+        if (extChannel == nullptr){
+            // just an ideal or delay channel
+            send(msg, "external$o");
+            return;
+        } else {
+            bool busy = extChannel->isBusy();
+            if (! busy) {
+                // channel was idle
+                emit(busySignal, true);
+                send(msg, "external$o");
+                scheduleAt(extChannel->getTransmissionFinishTime(), channelFreeMsg);
             }
-            queue.insert(msg);
-            emit(queueLengthSignal, queue.getLength());
-            arrivalTimestamp[msg->getId()]=simTime();
+            else {
+                // check for container capacity
+                if (capacity >= 0 && queue.getLength() >= capacity) {
+                    emit(droppedSignal, 1);
+                    delete msg;
+                    return;
+                }
+                queue.insert(msg);
+                emit(queueLengthSignal, queue.getLength());
+                arrivalTimestamp[msg->getId()]=simTime();
+            }
         }
     }
 }
