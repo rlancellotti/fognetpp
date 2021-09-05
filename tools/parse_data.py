@@ -26,13 +26,13 @@ args = parser.parse_args()
 #### Code do load the SCA file in a data structure ####
 
 def is_top_level(l):
-    return l[0] in ["run", "param", "scalar", "statistic"]
+    return l[0] in ["run", "param", "config", "scalar", "statistic"]
 
 
 def parse_top_level(l):
     if l[0] == "run":
         return parse_run(l)
-    if l[0] == "param":
+    if l[0] == "param" or l[0] == "config":
         return parse_param(l)
     if l[0] == "scalar":
         return parse_scalar(l)
@@ -45,7 +45,7 @@ def parse_run(l):
 
 
 def parse_param(l):
-    return {"type": l[0], "object": l[1], "value": l[2].replace('"', '')}
+    return {"type": "param", "object": l[1], "value": l[2].replace('"', '')}
 
 
 def parse_scalar(l):
@@ -214,7 +214,13 @@ def get_scenario(scadata, schema):
         #print('"%s"' % schema[p]["pattern"])
         records = search(scadata, {'type': 'param', 'object': schema[p]["pattern"]})
         #print(records)
-        s[p] = extract_field(records, 'value')[0]
+        try:
+            s[p] = extract_field(records, 'value')[0]
+        except KeyError:
+            print('Key not found while looking for: ' + schema[p]["pattern"])
+            #print(records)
+            #print(extract_field(records, 'value'))
+            #exit()
     return s
 
 
@@ -232,6 +238,9 @@ def get_scalar(scadata, scalarname, objname):
 
 def aggregate(data, aggr):
     arr=np.array(data)
+    if len(data)==0:
+        print('Aggregating on empty record')
+        raise Exception(data, aggr)
     if aggr == "sum":
         return arr.sum()
     if aggr == "avg":
@@ -246,6 +255,8 @@ def get_metric_value(scadata, metric):
     data = get_scalar(scadata, metric["scalar_name"], metric["module"])
     #print(metric["scalar_name"], metric["module"], data) 
     v = {}
+    if len(data)==0:
+        print(metric["scalar_name"], metric["module"])
     for aggr in metric["aggr"]:
         v[aggr] = aggregate(data, aggr)
     return v
@@ -349,7 +360,7 @@ def process_sca(scaname, config):
     #for h in histograms:
     #    #hst.append({})
     #    print(json.dumps(get_histogram(scadata, histograms[h]), indent=4))
-    print(hst)
+    #print(hst)
     return {'scenario': scenario, 'metrics': val, 'histograms': hst}
 
 
