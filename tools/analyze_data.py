@@ -64,7 +64,10 @@ def get_values(conn, scenario_ids, metrics):
             query = ''' SELECT value FROM value WHERE scenarioid = '%s' AND metric = '%s' AND aggregation = '%s' ''' % (sid, m["metric"], m["aggr"])
             #print(query)
             c.execute(query)
-            samples.append(float(c.fetchone()[0]))
+            try:
+                samples.append(float(c.fetchone()[0]))
+            except :
+                print('exception when parsing result of this query: '+ query)
         mean=np.mean(samples)
         sigma=np.std(samples)
         rv.append(mean)
@@ -114,7 +117,7 @@ def do_histogram(conn, analysis):
         sid=scenarios[s]['sceanrio_ids'][0]
         #print(sid)
         bins = get_bins(conn, sid, analysis['histogram'])
-        print(bins)
+        #print(bins)
         with open(outfile, "w") as f:
             f.write('#value\tsamples\n')
             for r in bins:

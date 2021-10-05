@@ -230,6 +230,9 @@ def get_scalar(scadata, scalarname, objname):
         rv = extract_field(search(scadata, {'type': 'statistic', 'object': objname, 'name': statname}, {'type': 'field', 'name': fieldname}), 'value')
     else:
         rv = extract_field(search(scadata, {'type': 'scalar', 'object': objname, 'name': scalarname}), 'value')
+        #if 'last' in scalarname:
+        #    print(scalarname)
+        #    print(rv)
         #print(objname, scalarname)
         #print(rv)
     rv = [float(i) for i in rv]
@@ -253,7 +256,8 @@ def aggregate(data, aggr):
 
 def get_metric_value(scadata, metric):
     data = get_scalar(scadata, metric["scalar_name"], metric["module"])
-    #print(metric["scalar_name"], metric["module"], data) 
+    #if 'last' in metric["scalar_name"]:
+    #    print(metric["scalar_name"], metric["module"], data) 
     v = {}
     if len(data)==0:
         print(metric["scalar_name"], metric["module"])
@@ -353,6 +357,7 @@ def process_sca(scaname, config):
     #    json.dump(scadata, jdump, indent=4)
     scenario = get_scenario(scadata, schema)
     val = [{'metric': m, 'values': get_metric_value(scadata, metrics[m])} for m in metrics]
+    #print(val)
     #for m in metrics:
     #    val.append({'metric': m, "values": get_metric_value(scadata, metrics[m])})
     hst = [{'histogram': h, 'bins': get_histogram(scadata, histograms[h])} for h in histograms]
@@ -396,6 +401,7 @@ init_db(conn, schema)
 for res in results:
     scenario_id = save_scenario(conn, res["scenario"])
     metrics = res["metrics"]
+    #print(metrics)
     histograms = res["histograms"]
     for m in metrics:
         #print(m["metric"])
