@@ -27,7 +27,7 @@ simple FogSource
         volatile double suggestedTime @unit(s) = default(-1s);
         volatile double suggestedDelay @unit(s) = default(-1s);
         volatile int packetLength @unit(byte) = default(4KiB);
-        double SLAmult = default(10);
+        double suggestedDeadline @unit(s) = default(-1s);
         double maxInterval @unit(s) = default(-1s);
         int appId = default(0);
         bool realTime = default(false); //If 1 -> realtime 

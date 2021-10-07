@@ -15,7 +15,7 @@ packet FogJob
     simtime_t delayTime;    	// total time spent in delay modules
     simtime_t balancerTime;    	// total time spent in Load balancing modules
     simtime_t probeTime;		// time passed waiting for probe
-    simtime_t slaDeadline;		// deadline for SLA
+    simtime_t slaDeadline;		// deadline for SLA (-1 for no deadline)
 	simtime_t suggestedTime;	// suggested service time. 
 	simtime_t suggestedDelay;	// suggested delay time. 
     
@@ -26,6 +26,5 @@ packet FogJob
     //int id;					// id of the msg
     double previousLoad;		// load of the node that sent the message
     double expectedLoad;		// expectation of remote load on the node the sent the message
-    bool realTime;				// flag realtime, if 1-> drop job when SLA expires, if 0-> no drop
 }
 

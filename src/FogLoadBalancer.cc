@@ -491,7 +491,7 @@ namespace fog {
      * So, if it is flag as realTime and if SLA is expired
      */
     bool FogLoadBalancer::checkSlaExpired(FogJob *job) {
-        return (job->getRealTime() && !(simTime()<=job->getSlaDeadline()));
+        return ((job->getSlaDeadline()>0) && !(simTime()<=job->getSlaDeadline()));
     }
 
     /**

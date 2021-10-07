@@ -505,17 +505,17 @@ bool FogPU::checkTimeoutExpired(FogJob *job, bool autoremove)
     return false;
 }
 
-bool FogPU::checkSlaExpired(FogJob *job, bool allowremove)
+bool FogPU::checkSlaExpired(FogJob *job, bool autoremove)
 {
     if (job == NULL)
     {
         return false;
     }
-    if (job->getRealTime() && (simTime()>job->getSlaDeadline()))
+    if ((job->getSlaDeadline()>0) && (simTime()>job->getSlaDeadline()))
     {
         //EV << "Dropping job from checkSlaExpired()";
         // drop and increase droppedJobSla
-        if (allowremove)
+        if (autoremove)
         {
             droppedJobsSLA++;
             emit(droppedSignal, 1);

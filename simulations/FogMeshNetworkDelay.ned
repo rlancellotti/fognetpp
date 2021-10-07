@@ -40,6 +40,7 @@ network FogMeshNetworkDelay
         double etaP = default(0.1);
         source[*].suggestedTime=default(truncnormal(1s, 0.1s));
         source[*].sendInterval=default(exponential(1.1s));
+        source[*].suggestedDeadline=default(-1s);
         fog[*].nServers=default(1);
         fog[*].server[*].serviceTime = -1s;
         fog[*].server[*].timeout = default(-1s); // disable timeout

@@ -60,9 +60,12 @@ void FogSource::handleMessage(cMessage *msg)
     job->setQueueCount(0);
     job->setDelayCount(0);
     job->setBalancerCount(0);
-    job->setSlaDeadline(simTime()+job->getSuggestedTime()*par("SLAmult"));
+    if (par("suggestedDeadline").doubleValue()>0){
+        job->setSlaDeadline(simTime()+par("suggestedDeadline").doubleValue());
+    } else {
+        job->setSlaDeadline(-1.0);
+    }
     job->setAppId(par("appId"));
-    job->setRealTime(par("realTime"));
     job->setByteLength(par("packetLength"));
     job->setPreviousLoad(-1);
     job->setExpectedLoad(-1);

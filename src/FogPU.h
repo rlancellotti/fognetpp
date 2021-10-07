@@ -69,7 +69,7 @@ class FogPU : public cSimpleModule
         void deleteRemainingTime(cMessage *job);
         void scheduleNextEvent();
         bool checkTimeoutExpired(FogJob *job, bool autoremove=true);
-        bool checkSlaExpired(FogJob *job, bool allowremove=true);
+        bool checkSlaExpired(FogJob *job, bool autoremove=true);
         void setTimeout(FogJob *job);
         void cancelTimeout(FogJob *job);
         void removeExpiredJobs();

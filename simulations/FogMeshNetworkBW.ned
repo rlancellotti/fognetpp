@@ -40,7 +40,11 @@ network FogMeshNetworkBW
         fog[*].nServers=default(1);
         fog[*].server[*].serviceTime = -1s;
         fog[*].server[*].timeout = default(-1s); // disable timeout
-
+	types:
+        channel C extends DatarateChannel {
+            delay = linkdelay; 
+            datarate=linkdatarate;
+        }
     submodules:
         source[nSources]: FogSource;
         fog[nSources]: <default("FogNode")> like IFogNode;
@@ -58,8 +62,7 @@ network FogMeshNetworkBW
         classifier.rest --> sink[nClasses].in++;
         // add delay
         for i=0..nSources-2, for j=i+1..nSources-1 {
-            fog[i].toNeighbors++ --> {delay = linkdelay; datarate=linkdatarate;} --> fog[j].fromNeighbors++;
-            fog[j].toNeighbors++ --> {delay = linkdelay; datarate=linkdatarate;} --> fog[i].fromNeighbors++;
+            fog[i].neighbor++ <--> C <--> fog[j].neighbor++;
         }
 
 }
