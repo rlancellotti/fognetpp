@@ -22,6 +22,6 @@ simple FogSequentialForwarding extends FogLoadBalancer like IFogLoadBalancer
 {
     parameters:
         @class("FogSequentialForwarding");       
-        bool adaptive = default(true);
+        bool adaptive = default(false);
         int thr = default(1);
 }

@@ -103,15 +103,13 @@ void FogPU::scheduleNextEvent()
     simtime_t remainingTime, now;
     now = simTime();
     remainingTime = getRemainingTime(jobServiced);
-    if ((remainingTime <= timeSlice) || (timeSlice <= 0))
-    {
+    if ((remainingTime <= timeSlice) || (timeSlice <= 0)) {
         EV<<"EndMessage: ";
         EV<<"RemainingTime: "<<remainingTime<<" schedule at: "<<now+(remainingTime*congestionMultiplier)<<endl;
         setRemainingTime(jobServiced, remainingTime);
         scheduleAt(now + (remainingTime * congestionMultiplier), endServiceMsg);
     }
-    else
-    {
+    else  {
         EV<<"ContextSwitch: ";
         EV<<"RemainingTime: "<<remainingTime<<" schedule at: "<<now+(timeSlice*congestionMultiplier)<<endl;
         setRemainingTime(jobServiced, remainingTime - timeSlice);
@@ -127,37 +125,31 @@ void FogPU::processCongestionUpdateMessage(cMessage *msg)
     simtime_t remainingTime = 0.0;
     simtime_t now;
     now = simTime();
-    if (congested)
-    {
+    if (congested)  {
         totalCongestionTime = totalCongestionTime + (now - startCongestionTime);
     }
-    else
-    {
+    else {
         totalNCongestionTime = totalNCongestionTime + (now - startNCongestionTime);
     }
     congested = umsg->getCongestion();
-    if (congested)
-    {
+    if (congested) {
         congestionMultiplier = umsg->getMultiplier();
         startCongestionTime = now;
     }
-    else
-    {
+    else  {
         congestionMultiplier = 1.0;
         startNCongestionTime = now;
     }
     // dispose of congestionUpdate message
     delete umsg;
-    if (busy)
-    {
+    if (busy)  {
         if (endServiceMsg->isScheduled())
         {
             remainingTime = endServiceMsg->getArrivalTime() - now;
             cancelEvent(endServiceMsg);
             scheduleAt(now + (remainingTime * congestionMultiplier / oldCongestionMultiplier), endServiceMsg);
         }
-        if (contextSwitchMsg->isScheduled())
-        {
+        if (contextSwitchMsg->isScheduled()) {
             remainingTime = contextSwitchMsg->getArrivalTime() - now;
             cancelEvent(contextSwitchMsg);
             scheduleAt(now + (remainingTime * congestionMultiplier / oldCongestionMultiplier), contextSwitchMsg);
@@ -173,8 +165,7 @@ void FogPU::processContextSwitchMessage(cMessage *msg)
 {
     //EV << "processContextSwitchMessage " << msg << "(job serviced=" << jobServiced->getId() << ", qlen=" << queue.getLength() << ")\n";
     removeExpiredJobs();
-    if (!queue.isEmpty())
-    {
+    if (!queue.isEmpty()) {
         FogJob *oldJob;
         // stop service of current job
         stopService(jobServiced);
@@ -192,18 +183,13 @@ void FogPU::processEndServiceMessage(cMessage *msg)
 {
     EV << "processEndServiceMessage " << msg << " (job serviced " << jobServiced->getId() << ")\n";
     removeExpiredJobs();
-
     endService(jobServiced);
-
-    if (queue.isEmpty())
-    {
-
+    if (queue.isEmpty()) {
         jobServiced = NULL;
         //emit(busySignal, 0);
         changeState(ANY2IDLE);
     }
-    else
-    {
+    else {
         jobServiced = getFromQueue();
         emit(queueLengthSignal, length());
         resumeService(jobServiced);
@@ -220,13 +206,13 @@ void FogPU::processFogAppJobMessage(cMessage *msg)
     setupService(job);
     // if timeout is expired, simply drop the job and continue
     totalJobs++;
-    if (checkTimeoutExpired(job) || checkSlaExpired(job))
-    {
+    if (checkTimeoutExpired(job) || checkSlaExpired(job)) {
         return;
     }
-    if (!jobServiced)
-    {
+    // FIXME: must send update load message
+    if (!jobServiced)  {
         // processor was idle
+        notifyLoad();
         jobServiced = job;
         //emit(busySignal, true);
         changeState(ANY2BUSY);
@@ -234,11 +220,9 @@ void FogPU::processFogAppJobMessage(cMessage *msg)
         resumeService(jobServiced);
         scheduleNextEvent();
     }
-    else
-    {
+    else {
         // check for container capacity
-        if (capacity >= 0 && queue.getLength() >= capacity)
-        {
+        if (capacity >= 0 && queue.getLength() >= capacity) {
             EV << "Capacity full! Job dropped.\n";
             notifyLoad();
             //if (ev.isGUI()) bubble("Dropped!");
@@ -248,11 +232,13 @@ void FogPU::processFogAppJobMessage(cMessage *msg)
             delete job;
             return;
         }
-        queue.insert(job);
-        //emit(queueLengthSignal, length());
-        if (timeSlice <= 0)
-        {
-            job->setQueueCount(job->getQueueCount() + 1);
+        else {
+            queue.insert(job);
+            //emit(queueLengthSignal, length());
+            if (timeSlice <= 0) {
+                job->setQueueCount(job->getQueueCount() + 1);
+            }
+            notifyLoad();
         }
     }
 }
@@ -331,30 +317,22 @@ void FogPU::deleteRemainingTime(cMessage *job)
 
 void FogPU::handleMessage(cMessage *msg)
 {
-    if (msg == timeoutMsg)
-    {
+    if (msg == timeoutMsg) {
         processTimeoutMessage(msg);
     }
-    else
-    {
-        if (msg == endServiceMsg)
-        {
+    else  {
+        if (msg == endServiceMsg)  {
             processEndServiceMessage(msg);
         }
-        else
-        {
-            if (msg == contextSwitchMsg)
-            {
+        else {
+            if (msg == contextSwitchMsg) {
                 processContextSwitchMessage(msg);
             }
-            else
-            {
-                if (strcmp(msg->getArrivalGate()->getName(), CONGESTIONGATENAME) == 0)
-                {
+            else  {
+                if (strcmp(msg->getArrivalGate()->getName(), CONGESTIONGATENAME) == 0) {
                     processCongestionUpdateMessage(msg);
                 }
-                else
-                {
+                else  {
                     processFogAppJobMessage(msg);
                 }
             }

@@ -446,17 +446,19 @@ namespace fog {
     }
 
     void FogLoadBalancer::shuffle(std::vector<int> *v){
-        for (int i=v->size()-1; i>=1; i--){
-            int j=intrand(i+1); //0 <= j <= i
-            int x=v->at(i);
-            v->at(i)=v->at(j);
-            v->at(j)=x;
+        if (v->size()>0){
+            for (int i=v->size()-1; i>=1; i--){
+                int j=intrand(i+1); //0 <= j <= i
+                int x=v->at(i);
+                v->at(i)=v->at(j);
+                v->at(j)=x;
+            }
+            // print vector
+            EV<<"Shuffle: [";
+            for (std::vector<int>::const_iterator i = v->begin(); i != v->end(); ++i)
+                EV << *i << ", ";
+            EV<< "]" << endl;
         }
-        // print vector
-        EV<<"Shuffle: [";
-        for (std::vector<int>::const_iterator i = v->begin(); i != v->end(); ++i)
-            EV << *i << ", ";
-        EV<< "]" << endl;
     }
 
     /**
@@ -466,6 +468,7 @@ namespace fog {
         //Randomize the vector containing all neighs and return subvector
         //according with fanout for size
         shuffle(&probeGates);
+        fanout=std::min((int) fanout, (int) probeGates.size());
         //std::random_shuffle(probeGates.begin(), probeGates.end());
         std::vector<int> neighs;
         neighs.resize(fanout);
@@ -516,6 +519,7 @@ namespace fog {
      * Fill up probeQueue with a new query
      */
     void FogLoadBalancer::startProbes(FogJob *job) {
+        EV<<"starting probes"<<endl;
         int queryId, fanout = getFanout();
         std::vector<int> neighs = getNeighbors(fanout);
         EV<<"StartProbe([";

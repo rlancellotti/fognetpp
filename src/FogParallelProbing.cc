@@ -41,7 +41,7 @@ namespace fog {
         ProbeData * pd = pq.getDataFromJobId(job->getId());
         if (pd == nullptr) { // no probing being carried out
             EV << "localLoad: " << lowestLocalLoad << " thr: " << thr << "\n";
-            return (lowestLocalLoad < thr);
+            return (lowestLocalLoad < thr || thr < 0);
         } else { // probing is underway
             int lowestRemoteLoad = pd->getLowestLoad();
             EV << "localLoad: " << lowestLocalLoad << " remoteLoad: " <<lowestRemoteLoad << "\n";

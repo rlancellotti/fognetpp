@@ -57,7 +57,7 @@ namespace fog {
         }
         else {
             EV<<"LOCAL LOAD: "<< localLoad <<"thr: "<< thr<<endl;
-            if (localLoad < thr){
+            if (localLoad < thr || thr <0){
                 return true;
             } else {
                 return false;

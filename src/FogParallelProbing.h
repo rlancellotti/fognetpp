@@ -42,7 +42,6 @@ class FogParallelProbing: public FogLoadBalancer {
         bool decideForwardNow(FogJob *job, int queryId);
     private:
         int fanout;
-        int max_hop;
         int thr;
         int thr_shortcut;
     };
