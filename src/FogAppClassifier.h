@@ -1,5 +1,5 @@
-#ifndef __FOG_CLASSIFIER_H
-#define __FOG_CLASSIFIER_H
+#ifndef __FOG_APPCLASSIFIER_H
+#define __FOG_APPCLASSIFIER_H
 
 #include <omnetpp.h>
 
