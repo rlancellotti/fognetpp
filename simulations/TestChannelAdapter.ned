@@ -46,6 +46,6 @@ network TestChannelAdapter
         //adapter[1].out --> {delay = 1s;} -->sink[1].in++;
         //adapter[2].out --> {delay = 5s;} -->sink[2].in++;
        	//adapter[3].out --> {delay = 0s; datarate = 2E6 bps;} -->sink[3].in++;
-       	adapter[0].external$o --> {delay = 0s; datarate = BW;} -->sink[0].in++;
+       	adapter[0].external$o --> {delay = 0s; datarate = parent.BW;} -->sink[0].in++;
        	adapter[1].internal$o --> sink[0].in++;
 }
